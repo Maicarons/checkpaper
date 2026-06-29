@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     project_name: str = "CheckPaper"
     
     # CORS 配置
-    backend_cors_origins: List[str] = ["http://localhost:3000", "http://localhost:8000"]
+    backend_cors_origins: List[str] = ["http://localhost:9032", "http://localhost:9031"]
     
     # 数据库配置
     # 本地开发: sqlite:///./checkpaper.db
