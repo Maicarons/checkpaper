@@ -16,134 +16,239 @@ body {
   min-height: 100vh;
 }
 
-.site-layout-content {
-  padding: 24px;
-  min-height: calc(100vh - 64px - 69px);
-  background: #fff;
+/* Feature Card Hover Effect */
+.feature-card {
+  transition: all 0.3s ease !important;
 }
 
-.logo {
-  float: left;
-  width: 120px;
-  height: 31px;
-  margin: 16px 24px 16px 0;
-  color: white;
-  font-size: 20px;
-  font-weight: bold;
-  line-height: 31px;
+.feature-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
 }
 
-.upload-area {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 40px;
+/* Upload Dragger Styles */
+.ant-upload-drag {
+  border-radius: 12px !important;
+  border: 2px dashed #D1D5DB !important;
+  background: #F9FAFB !important;
+  transition: all 0.3s ease !important;
 }
 
-.validation-card {
-  margin-bottom: 16px;
+.ant-upload-drag:hover {
+  border-color: #4F46E5 !important;
+  background: #EEF2FF !important;
 }
 
-.issue-critical {
-  color: #ff4d4f;
+.ant-upload-drag-icon {
+  margin-bottom: 16px !important;
 }
 
-.issue-warning {
-  color: #faad14;
+.ant-upload-drag-icon .anticon {
+  color: #9CA3AF !important;
+  font-size: 64px !important;
 }
 
-.issue-info {
-  color: #1890ff;
+.ant-upload-drag p.ant-upload-text {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  color: #374151 !important;
 }
 
-.score-card {
-  text-align: center;
+.ant-upload-drag p.ant-upload-hint {
+  font-size: 14px !important;
+  color: #6B7280 !important;
 }
 
-.score-value {
-  font-size: 48px;
-  font-weight: bold;
-  color: #1890ff;
+/* Menu Styles */
+.ant-menu-horizontal {
+  border-bottom: none !important;
 }
 
-.markdown-content {
-  padding: 20px;
-  line-height: 1.8;
-}
-
-.markdown-content h1 {
-  font-size: 28px;
-  margin-bottom: 16px;
-  border-bottom: 1px solid #eee;
-  padding-bottom: 8px;
-}
-
-.markdown-content h2 {
-  font-size: 24px;
-  margin-top: 24px;
-  margin-bottom: 12px;
-}
-
-.markdown-content h3 {
-  font-size: 20px;
-  margin-top: 20px;
-  margin-bottom: 8px;
-}
-
-.markdown-content p {
-  margin-bottom: 12px;
-}
-
-.markdown-content ul,
-.markdown-content ol {
-  padding-left: 24px;
-  margin-bottom: 12px;
-}
-
-.markdown-content code {
-  background: #f5f5f5;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
-}
-
-.markdown-content pre {
-  background: #f5f5f5;
-  padding: 16px;
+.ant-menu-horizontal > .ant-menu-item {
+  font-weight: 500;
+  color: #374151;
   border-radius: 8px;
-  overflow-x: auto;
-  margin-bottom: 16px;
+  padding: 0 16px;
+  transition: all 0.2s ease;
 }
 
-.markdown-content pre code {
-  background: none;
-  padding: 0;
+.ant-menu-horizontal > .ant-menu-item:hover {
+  color: #4F46E5;
+  background: #EEF2FF;
 }
 
-.markdown-content blockquote {
-  border-left: 4px solid #1890ff;
-  padding-left: 16px;
-  margin: 16px 0;
-  color: #666;
+.ant-menu-horizontal > .ant-menu-item-selected {
+  color: #4F46E5;
+  background: #EEF2FF;
 }
 
-.markdown-content table {
+.ant-menu-horizontal > .ant-menu-item-selected::after {
+  display: none;
+}
+
+/* Button Styles */
+.ant-btn-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  box-shadow: 0 4px 14px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+}
+
+.ant-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+}
+
+/* Card Styles */
+.ant-card {
+  transition: all 0.3s ease;
+}
+
+.ant-card-hoverable:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Steps Styles */
+.ant-steps .ant-steps-item-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+}
+
+.ant-steps .ant-steps-item-finish .ant-steps-item-icon {
+  background: #059669;
+  border-color: transparent;
+}
+
+.ant-steps .ant-steps-item-process .ant-steps-item-icon {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+}
+
+/* Checkbox Styles */
+.ant-checkbox-wrapper {
   width: 100%;
-  border-collapse: collapse;
-  margin: 16px 0;
 }
 
-.markdown-content th,
-.markdown-content td {
-  border: 1px solid #ddd;
-  padding: 12px;
-  text-align: left;
+/* Tag Styles */
+.ant-tag {
+  border-radius: 20px;
+  padding: 4px 16px;
+  font-size: 14px;
 }
 
-.markdown-content th {
-  background: #fafafa;
+/* Smooth Scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Selection Color */
+::selection {
+  background: #4F46E5;
+  color: #fff;
+}
+
+/* Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Table Styles */
+.ant-table {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.ant-table-thead > tr > th {
+  background: #F9FAFB;
   font-weight: 600;
+  color: #374151;
+  border-bottom: 2px solid #E5E7EB;
 }
 
-.markdown-content tr:hover {
-  background: #f5f5f5;
+.ant-table-tbody > tr > td {
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: #F9FAFB;
+}
+
+/* Modal Styles */
+.ant-modal-content {
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.ant-modal-header {
+  border-bottom: 1px solid #E5E7EB;
+  padding: 20px 24px;
+}
+
+.ant-modal-body {
+  padding: 24px;
+}
+
+.ant-modal-footer {
+  border-top: 1px solid #E5E7EB;
+  padding: 16px 24px;
+}
+
+/* Form Styles */
+.ant-form-item-label > label {
+  font-weight: 500;
+  color: #374151;
+}
+
+.ant-input,
+.ant-select-selector,
+.ant-picker {
+  border-radius: 8px !important;
+}
+
+/* Notification Styles */
+.ant-notification-notice {
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Message Styles */
+.ant-message-notice-content {
+  border-radius: 8px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Tooltip Styles */
+.ant-tooltip-inner {
+  border-radius: 8px;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .ant-layout-header {
+    padding: 0 16px !important;
+  }
+
+  .ant-menu-horizontal {
+    font-size: 14px;
+  }
+
+  .ant-menu-horizontal > .ant-menu-item {
+    padding: 0 8px;
+  }
 }
