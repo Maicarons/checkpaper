@@ -1,26 +1,24 @@
 """
 CheckPaper 论文验证端点
 """
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
-from sqlmodel import Session
-from datetime import datetime
 
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
+from sqlmodel import Session
+
+from ....api.deps import (
+    get_agent_service,
+    get_pagination_params,
+    get_validation_service,
+)
 from ....core.db import get_session
 from ....schemas.validation import (
     ValidationRequest,
     ValidationResponse,
     ValidationStatus,
-    ValidationTypeEnum
+    ValidationTypeEnum,
 )
-from ....services.validation import ValidationService
 from ....services.agent import AgentService
-from ....api.deps import (
-    get_validation_service,
-    get_agent_service,
-    get_pagination_params
-)
-
+from ....services.validation import ValidationService
 
 router = APIRouter()
 
@@ -35,7 +33,7 @@ async def start_validation(
 ):
     """
     开始论文验证
-    
+
     - **document_id**: 文档ID
     - **validation_types**: 验证类型列表
     - **options**: 验证选项
@@ -44,7 +42,7 @@ async def start_validation(
     document = validation_service.get_document(session, request.document_id)
     if not document:
         raise HTTPException(status_code=404, detail="文档未找到")
-    
+
     # 创建验证任务
     validation_task = validation_service.create_validation_task(
         session,
@@ -52,7 +50,7 @@ async def start_validation(
         validation_types=request.validation_types,
         options=request.options
     )
-    
+
     # 在后台执行验证
     background_tasks.add_task(
         _run_validation_background,
@@ -61,7 +59,7 @@ async def start_validation(
         validation_types=request.validation_types,
         options=request.options or {}
     )
-    
+
     return ValidationResponse(
         task_id=validation_task.id,
         document_id=request.document_id,
@@ -76,8 +74,8 @@ async def list_validation_tasks(
     session: Session = Depends(get_session),
     validation_service: ValidationService = Depends(get_validation_service),
     pagination: dict = Depends(get_pagination_params),
-    document_id: Optional[str] = None,
-    status: Optional[ValidationStatus] = None
+    document_id: str | None = None,
+    status: ValidationStatus | None = None
 ):
     """
     获取验证任务列表
@@ -89,7 +87,7 @@ async def list_validation_tasks(
         document_id=document_id,
         status=status
     )
-    
+
     # 转换为响应格式
     return [
         {
@@ -117,7 +115,7 @@ async def get_validation_task(
     task = validation_service.get_validation_task(session, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="验证任务未找到")
-    
+
     return task
 
 
@@ -133,13 +131,13 @@ async def get_validation_results(
     task = validation_service.get_validation_task(session, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="验证任务未找到")
-    
+
     if task.status != ValidationStatus.COMPLETED:
         raise HTTPException(
             status_code=400,
             detail=f"验证任务尚未完成，当前状态: {task.status}"
         )
-    
+
     results = validation_service.get_validation_results(session, task_id)
     return results
 
@@ -156,23 +154,23 @@ async def cancel_validation_task(
     task = validation_service.get_validation_task(session, task_id)
     if not task:
         raise HTTPException(status_code=404, detail="验证任务未找到")
-    
+
     if task.status in [ValidationStatus.COMPLETED, ValidationStatus.CANCELLED]:
         raise HTTPException(
             status_code=400,
             detail=f"无法取消当前状态的任务: {task.status}"
         )
-    
+
     # 取消任务
     validation_service.cancel_validation_task(session, task_id)
-    
+
     return {"message": "验证任务已取消"}
 
 
 @router.post("/quick")
 async def quick_validation(
     document_id: str,
-    validation_types: Optional[List[ValidationTypeEnum]] = None,
+    validation_types: list[ValidationTypeEnum] | None = None,
     session: Session = Depends(get_session),
     validation_service: ValidationService = Depends(get_validation_service),
     agent_service: AgentService = Depends(get_agent_service)
@@ -184,11 +182,11 @@ async def quick_validation(
     document = validation_service.get_document(session, document_id)
     if not document:
         raise HTTPException(status_code=404, detail="文档未找到")
-    
+
     # 设置默认验证类型
     if validation_types is None:
         validation_types = list(ValidationTypeEnum)
-    
+
     # 执行验证
     try:
         results = await agent_service.run_validation(
@@ -196,16 +194,16 @@ async def quick_validation(
             validation_types=validation_types,
             options={}
         )
-        
+
         return results
     except Exception as e:
         raise HTTPException(
             status_code=500,
             detail=f"验证执行失败: {str(e)}"
-        )
+        ) from e
 
 
-@router.get("/types", response_model=List[dict])
+@router.get("/types", response_model=list[dict])
 async def get_validation_types():
     """
     获取支持的验证类型列表
@@ -247,41 +245,41 @@ async def get_validation_types():
 async def _run_validation_background(
     task_id: str,
     document_id: str,
-    validation_types: List[ValidationTypeEnum],
+    validation_types: list[ValidationTypeEnum],
     options: dict
 ):
     """
     后台执行验证任务
     """
     from ....core.db import SessionLocal
-    
+
     session = SessionLocal()
     try:
         validation_service = ValidationService()
         agent_service = AgentService()
-        
+
         # 更新任务状态为执行中
         validation_service.update_task_status(
             session, task_id, ValidationStatus.RUNNING
         )
-        
+
         # 执行验证
         results = await agent_service.run_validation(
             document_id=document_id,
             validation_types=validation_types,
             options=options
         )
-        
+
         # 保存结果
         validation_service.save_validation_results(
             session, task_id, results
         )
-        
+
         # 更新任务状态为完成
         validation_service.update_task_status(
             session, task_id, ValidationStatus.COMPLETED
         )
-        
+
     except Exception as e:
         # 更新任务状态为失败
         validation_service.update_task_status(

@@ -8,9 +8,6 @@ import {
   message,
   Checkbox,
   Space,
-  Form,
-  Input,
-  Select,
 } from 'antd'
 import { InboxOutlined, UploadOutlined } from '@ant-design/icons'
 import type { UploadFile, UploadProps } from 'antd'
@@ -18,7 +15,6 @@ import { documentApi, validationApi } from '../services/api'
 
 const { Title, Paragraph } = Typography
 const { Dragger } = Upload
-const { Option } = Select
 
 const validationTypes = [
   { label: '格式检查', value: 'format', description: '检查论文格式、结构、目录' },
@@ -49,14 +45,14 @@ const UploadPage: React.FC = () => {
 
     try {
       // 上传文件
-      const uploadResult = await documentApi.upload(formData)
+      const uploadResult = await documentApi.upload(formData) as unknown as { id: string }
       message.success('文件上传成功')
 
       // 开始验证
       const validationResult = await validationApi.startValidation({
         document_id: uploadResult.id,
         validation_types: selectedTypes,
-      })
+      }) as unknown as { task_id: string }
 
       message.success('验证任务已创建')
       navigate(`/validation/${validationResult.task_id}`)
@@ -68,18 +64,11 @@ const UploadPage: React.FC = () => {
   }
 
   const uploadProps: UploadProps = {
-    onRemove: (file) => {
+    onRemove: () => {
       setFileList([])
     },
     beforeUpload: (file) => {
       // 验证文件类型
-      const allowedTypes = [
-        'application/pdf',
-        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-        'application/msword',
-        'application/x-tex',
-        'text/x-latex',
-      ]
       const allowedExtensions = ['.pdf', '.docx', '.doc', '.tex', '.latex']
       const extension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'))
 

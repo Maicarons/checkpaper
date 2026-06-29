@@ -2,23 +2,24 @@
 CheckPaper Agent 服务模块
 实现论文验证的核心逻辑
 """
-import re
 import json
-import httpx
-from typing import List, Dict, Any, Optional
+import re
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
-from ...schemas.validation import ValidationTypeEnum, IssueSeverity
+import httpx
+
 from ...core.config import settings
+from ...schemas.validation import IssueSeverity, ValidationTypeEnum
 
 
 class AgentService:
     """Agent 服务类"""
-    
+
     def __init__(self):
         self.client = None
         self._initialize_client()
-    
+
     def _initialize_client(self):
         """初始化 OpenAI 客户端"""
         try:
@@ -32,28 +33,28 @@ class AgentService:
         except Exception as e:
             print(f"警告: 无法初始化 OpenAI 客户端: {e}")
             self.model = settings.openai_model
-    
+
     async def run_validation(
         self,
         document_id: str,
-        validation_types: List[ValidationTypeEnum],
-        options: Dict[str, Any],
-        document_content: Optional[str] = None
-    ) -> Dict[str, Any]:
+        validation_types: list[ValidationTypeEnum],
+        options: dict[str, Any],
+        document_content: str | None = None
+    ) -> dict[str, Any]:
         """
         运行验证任务
-        
+
         Args:
             document_id: 文档ID
             validation_types: 验证类型列表
             options: 验证选项
             document_content: 文档内容（可选，用于测试）
-        
+
         Returns:
             验证结果字典
         """
         results = {}
-        
+
         for vtype in validation_types:
             try:
                 if vtype == ValidationTypeEnum.FORMAT:
@@ -78,13 +79,13 @@ class AgentService:
                     "info_count": 0,
                     "issues": []
                 }
-        
+
         return results
-    
+
     async def _validate_format(self, content: str, options: dict) -> dict:
         """
         验证论文格式
-        
+
         检查内容：
         - 标题层级和编号规范
         - 字体、字号一致性
@@ -93,14 +94,14 @@ class AgentService:
         - 图表编号连续性
         """
         issues = []
-        
+
         if not content:
             return self._empty_result("格式检查")
-        
+
         # 检查标题层级
         section_pattern = r'^(#{1,6})\s+(.+)$'
         sections = re.findall(section_pattern, content, re.MULTILINE)
-        
+
         if not sections:
             issues.append({
                 "severity": "warning",
@@ -109,9 +110,9 @@ class AgentService:
                 "description": "论文应包含清晰的章节标题（如：引言、方法、结果、讨论、结论）",
                 "suggestion": "使用标准的Markdown或LaTeX标题格式"
             })
-        
+
         # 检查常见论文章节
-        common_sections = ["引言", "introduction", "方法", "method", "结果", "result", 
+        common_sections = ["引言", "introduction", "方法", "method", "结果", "result",
                           "讨论", "discussion", "结论", "conclusion", "摘要", "abstract"]
         found_sections = []
         for _, title in sections:
@@ -120,7 +121,7 @@ class AgentService:
                 if cs in title_lower:
                     found_sections.append(cs)
                     break
-        
+
         if len(found_sections) < 3:
             issues.append({
                 "severity": "info",
@@ -129,11 +130,11 @@ class AgentService:
                 "description": f"只检测到以下标准章节: {', '.join(found_sections) if found_sections else '无'}",
                 "suggestion": "建议包含完整的论文章节：引言、方法、结果、讨论、结论"
             })
-        
+
         # 检查图表编号连续性
         fig_numbers = re.findall(r'(?:Fig(?:ure)?\.?\s*(\d+)|图\s*(\d+))', content, re.IGNORECASE)
         if fig_numbers:
-            nums = sorted(set(int(n[0] or n[1]) for n in fig_numbers))
+            nums = sorted({int(n[0] or n[1]) for n in fig_numbers})
             expected = list(range(1, len(nums) + 1))
             if nums != expected and len(nums) > 1:
                 issues.append({
@@ -143,7 +144,7 @@ class AgentService:
                     "description": f"检测到的图表编号: {nums}，期望: {expected}",
                     "suggestion": "请检查图表编号是否连续"
                 })
-        
+
         # 检查段落长度
         paragraphs = content.split('\n\n')
         long_paragraphs = [i for i, p in enumerate(paragraphs) if len(p) > 1000]
@@ -155,17 +156,17 @@ class AgentService:
                 "description": "过长的段落可能影响可读性",
                 "suggestion": "建议将长段落拆分为多个小段落"
             })
-        
+
         return self._build_result(
             status="completed",
             summary="格式检查完成",
             issues=issues
         )
-    
+
     async def _validate_figure_table(self, content: str, options: dict) -> dict:
         """
         验证图表引用
-        
+
         检查内容：
         - 所有图片/表格是否在正文中被显式引用
         - 引用编号是否与实际定义匹配
@@ -173,28 +174,28 @@ class AgentService:
         - 检测"未引用"的图/表
         """
         issues = []
-        
+
         if not content:
             return self._empty_result("图表引用检查")
-        
+
         # 提取图片定义
         fig_defs = set()
         fig_def_pattern = r'(?:Fig(?:ure)?\.?\s*(\d+)|图\s*(\d+))'
         for match in re.finditer(fig_def_pattern, content, re.IGNORECASE):
             num = match.group(1) or match.group(2)
             fig_defs.add(num)
-        
+
         # 提取表格定义
         tab_defs = set()
         tab_def_pattern = r'(?:Table\.?\s*(\d+)|表\s*(\d+))'
         for match in re.finditer(tab_def_pattern, content, re.IGNORECASE):
             num = match.group(1) or match.group(2)
             tab_defs.add(num)
-        
+
         # 提取正文中的引用
         fig_refs = set()
         tab_refs = set()
-        
+
         # 检查引用上下文
         ref_pattern = r'(?:见|参见|如|see|refer to|shown in|displayed in)\s+(?:Fig(?:ure)?\.?\s*(\d+)|图\s*(\d+)|Table\.?\s*(\d+)|表\s*(\d+))'
         for match in re.finditer(ref_pattern, content, re.IGNORECASE):
@@ -202,7 +203,7 @@ class AgentService:
                 fig_refs.add(match.group(1) or match.group(2))
             if match.group(3) or match.group(4):
                 tab_refs.add(match.group(3) or match.group(4))
-        
+
         # 检测未引用的图片
         unreferenced_figs = fig_defs - fig_refs
         for fig in unreferenced_figs:
@@ -213,7 +214,7 @@ class AgentService:
                 "description": f"图片 {fig} 在文中定义但未被显式引用",
                 "suggestion": "在正文中添加对图片的引用说明"
             })
-        
+
         # 检测未引用的表格
         unreferenced_tabs = tab_defs - tab_refs
         for tab in unreferenced_tabs:
@@ -224,17 +225,17 @@ class AgentService:
                 "description": f"表格 {tab} 在文中定义但未被显式引用",
                 "suggestion": "在正文中添加对表格的引用说明"
             })
-        
+
         return self._build_result(
             status="completed",
             summary=f"图表引用检查完成，发现 {len(fig_defs)} 个图片和 {len(tab_defs)} 个表格",
             issues=issues
         )
-    
+
     async def _validate_citation(self, content: str, options: dict) -> dict:
         """
         验证参考文献引用
-        
+
         检查内容：
         - 正文引用标记与参考文献列表的一致性
         - 重复引用检测
@@ -242,14 +243,14 @@ class AgentService:
         - 引用格式规范
         """
         issues = []
-        
+
         if not content:
             return self._empty_result("参考文献引用检查")
-        
+
         # 提取参考文献部分
         ref_section_pattern = r'(?:References|参考文献|Bibliography)\s*\n([\s\S]+?)(?:\n\n|\Z)'
         ref_match = re.search(ref_section_pattern, content, re.IGNORECASE)
-        
+
         # 提取参考文献条目
         references = set()
         if ref_match:
@@ -257,7 +258,7 @@ class AgentService:
             # 匹配 [1], [2] 等格式
             ref_entries = re.findall(r'\[(\d+)\]', ref_text)
             references = set(ref_entries)
-        
+
         # 提取正文中的引用
         citations = set()
         citation_pattern = r'\[(\d+(?:,\s*\d+)*)\]'
@@ -265,7 +266,7 @@ class AgentService:
             nums = match.group(1).split(',')
             for num in nums:
                 citations.add(num.strip())
-        
+
         # 检测引用但不在参考文献列表中的
         orphan_citations = citations - references
         for cite in orphan_citations:
@@ -276,7 +277,7 @@ class AgentService:
                 "description": f"正文中引用了 [{cite}]，但在参考文献列表中找不到对应条目",
                 "suggestion": "检查引用编号是否正确，或添加缺失的参考文献"
             })
-        
+
         # 检测在参考文献中但未被引用的
         unreferenced_refs = references - citations
         for ref in unreferenced_refs:
@@ -287,7 +288,7 @@ class AgentService:
                 "description": f"参考文献列表中的 [{ref}] 在正文中未被引用",
                 "suggestion": "删除未使用的参考文献或在正文中添加引用"
             })
-        
+
         # 检查引用格式
         malformed_citations = re.findall(r'\[\d+[^]\d]*\]', content)
         if malformed_citations:
@@ -298,17 +299,17 @@ class AgentService:
                 "description": f"检测到 {len(malformed_citations)} 个可能格式错误的引用",
                 "suggestion": "检查引用格式是否正确，应为 [数字] 格式"
             })
-        
+
         return self._build_result(
             status="completed",
             summary=f"引用检查完成，发现 {len(references)} 条参考文献和 {len(citations)} 处引用",
             issues=issues
         )
-    
+
     async def _validate_data_source(self, content: str, options: dict) -> dict:
         """
         验证数据来源
-        
+
         检查内容：
         - 数据来源是否明确标注
         - 数据集URL是否可访问
@@ -316,15 +317,15 @@ class AgentService:
         - 是否存在数据造假嫌疑
         """
         issues = []
-        
+
         if not content:
             return self._empty_result("数据来源验证")
-        
+
         # 检查是否提到数据来源
-        data_keywords = ["数据来源", "数据集", "dataset", "data source", "data from", 
+        data_keywords = ["数据来源", "数据集", "dataset", "data source", "data from",
                         "来源于", "收集自", "obtained from", "collected from"]
         has_data_source = any(kw in content.lower() for kw in data_keywords)
-        
+
         if not has_data_source:
             issues.append({
                 "severity": "warning",
@@ -333,15 +334,15 @@ class AgentService:
                 "description": "论文中未找到明确的数据来源说明",
                 "suggestion": "建议在方法部分明确说明数据来源"
             })
-        
+
         # 检查URL
         url_pattern = r'https?://[^\s<>\"\')\]]+'
         urls = re.findall(url_pattern, content)
-        
+
         # 检查DOI
         doi_pattern = r'doi:\s*(10\.\d{4,}/[^\s]+)'
-        dois = re.findall(doi_pattern, content, re.IGNORECASE)
-        
+        re.findall(doi_pattern, content, re.IGNORECASE)
+
         if urls:
             # 异步检查URL可访问性（抽样检查）
             async with httpx.AsyncClient(timeout=5.0) as client:
@@ -364,7 +365,7 @@ class AgentService:
                             "description": "无法连接到该URL",
                             "suggestion": "请检查URL是否正确"
                         })
-        
+
         # 检查数据统计描述
         stat_patterns = [
             (r'样本量[为是：:]\s*(\d+)', "样本量"),
@@ -372,7 +373,7 @@ class AgentService:
             (r'p\s*[<>=]\s*([\d.]+)', "p值"),
             (r'置信区间', "置信区间"),
         ]
-        
+
         for pattern, name in stat_patterns:
             matches = re.findall(pattern, content, re.IGNORECASE)
             if matches:
@@ -399,17 +400,17 @@ class AgentService:
                                 "description": "p值应在0-1之间",
                                 "suggestion": "请检查p值是否正确"
                             })
-        
+
         return self._build_result(
             status="completed",
             summary="数据来源验证完成",
             issues=issues
         )
-    
+
     async def _validate_data_processing(self, content: str, options: dict) -> dict:
         """
         验证数据处理
-        
+
         检查内容：
         - 统计方法是否正确
         - 样本量是否充足
@@ -418,10 +419,10 @@ class AgentService:
         - GRIM/SPRITE测试
         """
         issues = []
-        
+
         if not content:
             return self._empty_result("数据处理验证")
-        
+
         # 提取统计数据
         stats = {
             "means": [],
@@ -429,23 +430,23 @@ class AgentService:
             "ns": [],
             "pvalues": []
         }
-        
+
         # 提取均值
         mean_pattern = r'(?:M|均值|mean)\s*[=:]\s*([\d.]+)'
         stats["means"] = [float(m) for m in re.findall(mean_pattern, content, re.IGNORECASE)]
-        
+
         # 提取标准差
         sd_pattern = r'(?:SD|标准差|std)\s*[=:]\s*([\d.]+)'
         stats["sds"] = [float(s) for s in re.findall(sd_pattern, content, re.IGNORECASE)]
-        
+
         # 提取样本量
         n_pattern = r'(?:N|n|样本量)\s*[=:]\s*(\d+)'
         stats["ns"] = [int(n) for n in re.findall(n_pattern, content, re.IGNORECASE)]
-        
+
         # 提取p值
         p_pattern = r'p\s*[<>=]\s*([\d.]+)'
         stats["pvalues"] = [float(p) for p in re.findall(p_pattern, content, re.IGNORECASE)]
-        
+
         # 验证p值
         for p in stats["pvalues"]:
             if p < 0 or p > 1:
@@ -464,7 +465,7 @@ class AgentService:
                     "description": "p值通常不应精确为0",
                     "suggestion": "建议报告p < 0.001或更精确的值"
                 })
-        
+
         # 验证样本量
         for n in stats["ns"]:
             if n < 30:
@@ -475,10 +476,10 @@ class AgentService:
                     "description": "样本量小于30，统计检验力可能不足",
                     "suggestion": "考虑增加样本量或使用适合小样本的统计方法"
                 })
-        
+
         # GRIM测试（GRIM test）- 验证均值与整数数据的一致性
         if stats["means"] and stats["ns"]:
-            for mean, n in zip(stats["means"], stats["ns"]):
+            for mean, n in zip(stats["means"], stats["ns"], strict=False):
                 if n > 0:
                     # GRIM测试：均值乘以样本量应该是整数
                     product = mean * n
@@ -492,17 +493,17 @@ class AgentService:
                                 "description": f"M × N = {product:.4f}，应为整数",
                                 "suggestion": "请检查均值和样本量是否正确"
                             })
-        
+
         return self._build_result(
             status="completed",
             summary="数据处理验证完成",
             issues=issues
         )
-    
+
     async def _validate_reference(self, content: str, options: dict) -> dict:
         """
         验证参考文献真实性
-        
+
         检查内容：
         - DOI是否存在且有效
         - 标题、作者、期刊信息是否匹配
@@ -510,14 +511,14 @@ class AgentService:
         - 是否是已知的虚假期刊或掠夺性期刊
         """
         issues = []
-        
+
         if not content:
             return self._empty_result("参考文献验证")
-        
+
         # 提取参考文献部分
         ref_section_pattern = r'(?:References|参考文献|Bibliography)\s*\n([\s\S]+?)(?:\n\n|\Z)'
         ref_match = re.search(ref_section_pattern, content, re.IGNORECASE)
-        
+
         if not ref_match:
             return self._build_result(
                 status="completed",
@@ -530,13 +531,13 @@ class AgentService:
                     "suggestion": "请确保论文包含参考文献列表"
                 }]
             )
-        
+
         ref_text = ref_match.group(1)
-        
+
         # 提取DOI
         doi_pattern = r'doi:\s*(10\.\d{4,}/[^\s,;]+)'
         dois = re.findall(doi_pattern, ref_text, re.IGNORECASE)
-        
+
         # 验证DOI
         async with httpx.AsyncClient(timeout=10.0) as client:
             for doi in dois[:5]:  # 只检查前5个DOI
@@ -581,7 +582,7 @@ class AgentService:
                         "description": str(e),
                         "suggestion": "请手动验证此文献"
                     })
-        
+
         # 检查参考文献数量
         ref_entries = re.findall(r'\[\d+\]', ref_text)
         if len(ref_entries) < 5:
@@ -592,13 +593,13 @@ class AgentService:
                 "description": "论文的参考文献数量可能不足",
                 "suggestion": "建议增加相关文献的引用"
             })
-        
+
         return self._build_result(
             status="completed",
             summary=f"参考文献验证完成，检查了 {len(dois)} 个DOI",
             issues=issues
         )
-    
+
     async def generate_report(
         self,
         document_id: str,
@@ -612,20 +613,20 @@ class AgentService:
         report_lines.append(f"**文档ID**: {document_id}\n")
         report_lines.append(f"**生成时间**: {datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')}\n")
         report_lines.append("\n---\n\n")
-        
+
         # 计算总问题数
         total_issues = sum(r.get("issues_count", 0) for r in validation_results.values())
         critical_issues = sum(r.get("critical_count", 0) for r in validation_results.values())
         warning_issues = sum(r.get("warning_count", 0) for r in validation_results.values())
-        
+
         report_lines.append("## 验证总结\n\n")
-        report_lines.append(f"| 指标 | 数量 |\n")
-        report_lines.append(f"|------|------|\n")
+        report_lines.append("| 指标 | 数量 |\n")
+        report_lines.append("|------|------|\n")
         report_lines.append(f"| 总问题数 | {total_issues} |\n")
         report_lines.append(f"| 严重问题 | {critical_issues} |\n")
         report_lines.append(f"| 警告 | {warning_issues} |\n")
         report_lines.append("\n---\n\n")
-        
+
         # 各项验证结果
         type_names = {
             "format": "格式检查",
@@ -635,12 +636,12 @@ class AgentService:
             "data_processing": "数据处理验证",
             "reference": "参考文献验证"
         }
-        
+
         for vtype, result in validation_results.items():
             report_lines.append(f"## {type_names.get(vtype, vtype)}\n\n")
             report_lines.append(f"**状态**: {'✅ 完成' if result.get('status') == 'completed' else '❌ 失败'}\n")
             report_lines.append(f"**总结**: {result.get('summary', '')}\n\n")
-            
+
             if result.get("issues"):
                 report_lines.append("### 发现的问题\n\n")
                 for issue in result["issues"]:
@@ -652,11 +653,11 @@ class AgentService:
                     report_lines.append("\n")
             else:
                 report_lines.append("✅ 未发现问题\n\n")
-            
+
             report_lines.append("\n---\n\n")
-        
+
         return "\n".join(report_lines)
-    
+
     def _empty_result(self, name: str) -> dict:
         """返回空结果"""
         return {
@@ -669,18 +670,18 @@ class AgentService:
             "details": {},
             "issues": []
         }
-    
+
     def _build_result(
         self,
         status: str,
         summary: str,
-        issues: List[Dict[str, Any]]
+        issues: list[dict[str, Any]]
     ) -> dict:
         """构建验证结果"""
         critical_count = sum(1 for i in issues if i.get("severity") == "critical")
         warning_count = sum(1 for i in issues if i.get("severity") == "warning")
         info_count = sum(1 for i in issues if i.get("severity") == "info")
-        
+
         return {
             "status": status,
             "issues_count": len(issues),

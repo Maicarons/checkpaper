@@ -3,29 +3,29 @@ CheckPaper MCP 服务器
 基于 Model Context Protocol 的验证工具服务器
 """
 import asyncio
-from typing import Any, Dict, List, Optional
+from typing import Any
+
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
-from mcp.types import Tool, TextContent
+from mcp.types import TextContent, Tool
 
 from .tools import (
-    parse_pdf,
-    parse_docx,
-    parse_latex,
     check_citations,
-    verify_references,
     check_figures,
     check_format,
-    web_search_reference
+    parse_docx,
+    parse_latex,
+    parse_pdf,
+    verify_references,
+    web_search_reference,
 )
-
 
 # 创建 MCP 服务器实例
 server = Server("checkpaper-validation")
 
 
 @server.list_tools()
-async def list_tools() -> List[Tool]:
+async def list_tools() -> list[Tool]:
     """列出所有可用工具"""
     return [
         Tool(
@@ -185,7 +185,7 @@ async def list_tools() -> List[Tool]:
 
 
 @server.call_tool()
-async def call_tool(name: str, arguments: Dict[str, Any]) -> List[TextContent]:
+async def call_tool(name: str, arguments: dict[str, Any]) -> list[TextContent]:
     """调用工具"""
     try:
         if name == "parse_pdf":
@@ -221,9 +221,9 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> List[TextContent]:
             )
         else:
             result = {"error": f"未知工具: {name}"}
-        
+
         return [TextContent(type="text", text=str(result))]
-    
+
     except Exception as e:
         return [TextContent(type="text", text=f"工具执行错误: {str(e)}")]
 

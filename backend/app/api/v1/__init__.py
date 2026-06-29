@@ -2,8 +2,8 @@
 CheckPaper API v1 路由模块
 """
 from fastapi import APIRouter
-from .endpoints import documents, validation, reports, health
 
+from .endpoints import documents, health, reports, validation
 
 # 创建 API 路由器
 api_router = APIRouter()

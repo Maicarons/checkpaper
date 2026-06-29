@@ -4,8 +4,8 @@
 import pytest
 from sqlmodel import Session
 
+from backend.app.schemas.document import DocumentStatusEnum, DocumentTypeEnum
 from backend.app.services.document import DocumentService
-from backend.app.schemas.document import Document, DocumentTypeEnum, DocumentStatusEnum
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def test_create_document(session: Session, document_service: DocumentService):
         "title": "Test Document",
         "status": DocumentStatusEnum.UPLOADED,
     }
-    
+
     document = document_service.create_document(session, doc_data)
     assert document.id == "test-doc-1"
     assert document.filename == "test.pdf"
@@ -45,7 +45,7 @@ def test_get_document(session: Session, document_service: DocumentService):
         "title": "Test Document 2",
     }
     document_service.create_document(session, doc_data)
-    
+
     # 获取文档
     document = document_service.get_document(session, "test-doc-2")
     assert document is not None
@@ -69,10 +69,10 @@ def test_get_documents_list(session: Session, document_service: DocumentService)
             "file_path": f"/uploads/test-doc-list-{i}.pdf",
             "file_size": 1024 * (i + 1),
             "file_type": DocumentTypeEnum.PDF,
-            f"title": f"Test Document {i}",
+            "title": f"Test Document {i}",
         }
         document_service.create_document(session, doc_data)
-    
+
     # 获取文档列表
     documents = document_service.get_documents(session, offset=0, limit=10)
     assert len(documents) >= 3
@@ -91,7 +91,7 @@ def test_update_document_status(session: Session, document_service: DocumentServ
         "title": "Test Status Document",
     }
     document_service.create_document(session, doc_data)
-    
+
     # 更新状态
     document = document_service.update_document_status(
         session, "test-doc-status", DocumentStatusEnum.PARSED
@@ -114,11 +114,11 @@ def test_delete_document(session: Session, document_service: DocumentService):
         "title": "Test Delete Document",
     }
     document_service.create_document(session, doc_data)
-    
+
     # 删除文档
     result = document_service.delete_document(session, "test-doc-delete")
     assert result is True
-    
+
     # 确认已删除
     document = document_service.get_document(session, "test-doc-delete")
     assert document is None

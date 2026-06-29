@@ -1,6 +1,5 @@
 import React from 'react'
 import { Routes, Route } from 'react-router-dom'
-import { Layout } from 'antd'
 import MainLayout from './layouts/MainLayout'
 import HomePage from './pages/HomePage'
 import UploadPage from './pages/UploadPage'

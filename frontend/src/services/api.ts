@@ -31,7 +31,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response) {
       // 服务器返回错误
-      const { status, data } = error.response
+      const { status } = error.response
       if (status === 401) {
         // 未授权，可以跳转到登录页
         console.error('未授权访问')

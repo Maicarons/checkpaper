@@ -1,10 +1,11 @@
 """
 CheckPaper 健康检查端点
 """
-from fastapi import APIRouter
-from datetime import datetime
-import psutil
 import platform
+from datetime import datetime
+
+import psutil
+from fastapi import APIRouter
 
 router = APIRouter()
 

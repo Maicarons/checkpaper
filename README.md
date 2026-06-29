@@ -1,176 +1,204 @@
-# CheckPaper - AI论文验证智能体系统
+# CheckPaper - AI Paper Verification Agent
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green.svg)](https://fastapi.tiangolo.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## 📖 项目简介
+## About
 
-CheckPaper 是一个基于 AI 的论文验证智能体系统，能够自动检测学术论文中的各种问题，包括格式规范、引用完整性、数据真实性等。
+CheckPaper is an AI-powered academic paper verification agent system. It automatically detects various issues in academic papers — including formatting non-compliance, citation errors, reference fraud, and data integrity problems — helping researchers improve the quality and reliability of their work.
 
-### ✨ 主要功能
+## Features
 
-- **格式检查**：检查论文格式、结构、目录对应关系
-- **图表引用检查**：检测图片/表格是否在文中被显式引用
-- **参考文献引用检查**：验证参考文献是否在文中被引用
-- **数据来源验证**：验证论文中数据来源的真实性
-- **数据处理验证**：验证论文数据处理的真实性
-- **参考文献验证**：联网搜索验证参考文献的真实性
+- **Format Checking** — Validates heading hierarchy, numbering consistency, font uniformity, page layout, and TOC accuracy
+- **Figure & Table Reference Check** — Cross-references all figure/table definitions against in-text citations; detects orphan and uncited references
+- **Citation Integrity Check** — Validates that every in-text citation matches a reference list entry; detects duplicates and missing references
+- **Data Source Verification** — Verifies data source authenticity and accessibility
+- **Data Processing Verification** — Runs GRIM/SPRITE statistical consistency tests; validates p-values and confidence intervals
+- **Reference Verification** — Verifies references against Crossref and Semantic Scholar APIs; checks DOI validity and detects potentially fraudulent citations
 
-### 🎯 支持格式
+## Supported Formats
 
-- PDF
-- Word (DOCX)
-- LaTeX
+| Format | Extensions | Parser |
+|--------|-----------|--------|
+| PDF | `.pdf` | PyMuPDF |
+| Word | `.docx`, `.doc` | python-docx |
+| LaTeX | `.tex`, `.latex` | pylatexenc |
+| BibTeX | `.bib` | bibtexparser |
 
-## 🚀 快速开始
+## Quick Start
 
-### 环境要求
+### Prerequisites
 
 - Python 3.11+
-- Node.js 18+ (前端开发)
-- Docker & Docker Compose (可选)
+- Node.js 18+ (for frontend development)
+- Docker & Docker Compose (optional)
 
-### 本地开发
+### Installation
 
-1. **克隆项目**
 ```bash
+# 1. Clone the repository
 git clone https://github.com/Maicarons/checkpaper.git
 cd checkpaper
-```
 
-2. **配置环境变量**
-```bash
+# 2. Configure environment variables
 cp .env.example .env
-# 编辑 .env 文件，配置 OpenAI API Key 等
-```
+# Edit .env with your OpenAI API key and settings
 
-3. **安装后端依赖**
-```bash
-# 使用 uv (推荐)
+# 3. Install backend dependencies
 pip install uv
 uv sync
 
-# 或使用 pip
-pip install -e .
-```
-
-4. **启动后端服务**
-```bash
+# 4. Start the backend server
 uvicorn backend.app.main:app --reload --port 9031
-```
 
-5. **安装前端依赖**
-```bash
+# 5. Install and start the frontend
 cd frontend
 npm install
 npm start
 ```
 
-### Docker 部署
+The application will be available at:
+- **Frontend:** http://localhost:9032
+- **Backend API:** http://localhost:9031
+- **Swagger UI:** http://localhost:9031/docs
+
+### Docker Deployment
 
 ```bash
-# 启动所有服务
+# Start all services
 docker-compose up -d
 
-# 启动生产环境（包含 MySQL）
+# Production with MySQL
 docker-compose --profile production up -d
 ```
 
-## 📁 项目结构
+## Project Structure
 
 ```
 checkpaper/
-├── backend/                    # 后端服务
+├── backend/                    # Backend services
 │   ├── app/
-│   │   ├── api/               # API 路由
-│   │   ├── core/              # 核心配置
-│   │   ├── services/          # 业务服务
-│   │   ├── schemas/           # 数据模型
-│   │   ├── prompts/           # 提示词模板
-│   │   └── main.py            # 应用入口
-│   ├── mcp_server/            # MCP 服务器
-│   └── tests/                 # 测试文件
-├── frontend/                   # 前端应用
-├── docker-compose.yml          # Docker 配置
-├── pyproject.toml              # Python 项目配置
-└── README.md                   # 项目文档
+│   │   ├── api/v1/endpoints/   # API route handlers
+│   │   ├── core/               # Configuration, security, DB
+│   │   ├── services/           # Business logic
+│   │   │   ├── document/       # Document parsing service
+│   │   │   ├── validation/     # Validation orchestration
+│   │   │   ├── agent/          # AI agent service
+│   │   │   └── report/         # Report generation
+│   │   ├── schemas/            # Pydantic data models
+│   │   ├── prompts/            # LLM prompt templates
+│   │   └── main.py             # FastAPI application entry
+│   ├── mcp_server/             # MCP tool server
+│   │   ├── tools/              # Tool implementations
+│   │   └── server.py           # MCP server entry
+│   └── tests/                  # Test files
+├── frontend/                   # React frontend application
+│   └── src/
+│       ├── pages/              # Page components
+│       ├── components/         # Reusable components
+│       ├── services/           # API client
+│       └── hooks/              # Custom React hooks
+├── docs/                       # VitePress documentation
+├── docker-compose.yml          # Docker configuration
+├── pyproject.toml              # Python project configuration
+└── .env.example                # Environment variable template
 ```
 
-## 🔧 配置说明
+## Tech Stack
 
-### 环境变量
+| Component | Technology |
+|-----------|------------|
+| Backend | Python 3.11+ · FastAPI · SQLModel |
+| Frontend | React 18 · TypeScript · Ant Design |
+| AI Agent | OpenAI Agents SDK · MCP Protocol |
+| Document Parsing | PyMuPDF · python-docx · pylatexenc |
+| Reference Verification | Crossref API · Semantic Scholar API |
+| Database | SQLite (dev) · MySQL (production) |
+| Deployment | Docker · Docker Compose |
 
-| 变量名 | 说明 | 默认值 |
-|--------|------|--------|
-| `OPENAI_API_KEY` | OpenAI API 密钥 | - |
-| `DATABASE_URL` | 数据库连接地址 | `sqlite:///./checkpaper.db` |
-| `SECRET_KEY` | 应用密钥 | `change-me-in-production` |
-| `DEBUG` | 调试模式 | `false` |
+## API Reference
 
-### 数据库配置
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/documents/upload` | POST | Upload a paper document |
+| `/api/v1/documents/` | GET | List uploaded documents |
+| `/api/v1/documents/{id}` | GET | Get document details |
+| `/api/v1/documents/{id}/parse` | POST | Parse document content |
+| `/api/v1/validation/start` | POST | Start a validation task |
+| `/api/v1/validation/tasks/{id}/results` | GET | Get validation results |
+| `/api/v1/validation/types` | GET | List validation types |
+| `/api/v1/reports/` | GET | List reports |
+| `/api/v1/reports/{id}/download` | GET | Download report (md/pdf/html) |
+| `/health` | GET | Health check |
 
-**本地开发 (SQLite)**
-```env
-DATABASE_URL=sqlite:///./checkpaper.db
-```
+Full API documentation available at [docs/api/](docs/api/) or when the server is running at `http://localhost:9031/docs`.
 
-**生产环境 (MySQL)**
-```env
-DATABASE_URL=mysql+pymysql://user:password@localhost:3306/checkpaper
-```
+## Validation Types
 
-## 📚 API 文档
+| Type | Description |
+|------|-------------|
+| `format` | Format and structure checking |
+| `figure_table` | Figure and table reference validation |
+| `citation` | Citation integrity checking |
+| `data_source` | Data source verification |
+| `data_processing` | Statistical consistency verification |
+| `reference` | Reference authenticity verification |
 
-启动服务后访问：
-- Swagger UI: http://localhost:9031/docs
-- ReDoc: http://localhost:9031/redoc
+## Documentation
 
-### 主要 API 端点
-
-- `POST /api/v1/documents/upload` - 上传论文
-- `POST /api/v1/validation/start` - 开始验证
-- `GET /api/v1/validation/tasks/{task_id}/results` - 获取验证结果
-- `GET /api/v1/reports/{report_id}` - 获取报告
-
-## 🧪 测试
+Full documentation is built with [VitePress](https://vitepress.dev/):
 
 ```bash
-# 运行所有测试
-pytest
-
-# 运行带覆盖率的测试
-pytest --cov=backend/app --cov-report=html
-
-# 运行特定测试
-pytest backend/tests/test_validation.py
+cd docs
+npm install
+npm run dev     # Development server
+npm run build   # Production build
 ```
 
-## 🛠️ 技术栈
+- **English:** [docs/guide/introduction.md](docs/guide/introduction.md)
+- **中文:** [docs/zh/guide/introduction.md](docs/zh/guide/introduction.md)
 
-- **后端**: Python, FastAPI, SQLModel, OpenAI Agents SDK
-- **前端**: React, TypeScript, Ant Design
-- **数据库**: SQLite (开发), MySQL (生产)
-- **文档解析**: PyMuPDF, python-docx, pylatexenc
-- **部署**: Docker, Docker Compose
+## Configuration
 
-## 📄 许可证
+Key environment variables (see [`.env.example`](.env.example) for all options):
 
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `OPENAI_API_KEY` | OpenAI API key | — |
+| `OPENAI_BASE_URL` | API base URL | `http://192.168.56.1:8990` |
+| `DATABASE_URL` | Database connection | `sqlite:///./checkpaper.db` |
+| `DEBUG` | Debug mode | `false` |
+| `SECRET_KEY` | Application secret | `change-me-in-production` |
 
-## 🤝 贡献
+## Testing
 
-欢迎贡献！请阅读 [CONTRIBUTING.md](CONTRIBUTING.md) 了解详情。
+```bash
+# Backend tests
+pytest
 
-## 📧 联系方式
+# Backend with coverage
+pytest --cov=backend/app --cov-report=html
 
-- 项目主页: https://github.com/Maicarons/checkpaper
-- 问题反馈: https://github.com/Maicarons/checkpaper/issues
+# Frontend tests
+cd frontend && npm test
 
-## 🙏 致谢
+# Linting
+ruff check . && mypy .
+```
 
-感谢以下开源项目：
-- [FastAPI](https://fastapi.tiangolo.com/)
-- [OpenAI](https://openai.com/)
-- [PyMuPDF](https://pymupdf.readthedocs.io/)
-- [Ant Design](https://ant.design/)
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for details, or read the [Developer Guide](docs/developer/contributing.md).
+
+## License
+
+This project is licensed under the MIT License — see [LICENSE](LICENSE) for details.
+
+## Acknowledgments
+
+Built with [FastAPI](https://fastapi.tiangolo.com/), [OpenAI](https://openai.com/), [PyMuPDF](https://pymupdf.readthedocs.io/), [Ant Design](https://ant.design/), and the [MCP Protocol](https://modelcontextprotocol.io/).
+
+---
+
+[中文文档](README_zh.md)

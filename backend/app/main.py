@@ -1,19 +1,19 @@
 """
 CheckPaper FastAPI 应用入口
 """
+import logging
+import time
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
 from starlette.exceptions import HTTPException as StarletteHTTPException
-import time
-import logging
 
+from .api.v1 import api_router
 from .core.config import settings
 from .core.db import init_db
-from .api.v1 import api_router
-
 
 # 配置日志
 logging.basicConfig(
@@ -31,7 +31,7 @@ async def lifespan(app: FastAPI):
     """
     # 启动时执行
     logger.info("正在启动 CheckPaper 应用...")
-    
+
     # 初始化数据库
     try:
         init_db()
@@ -39,17 +39,17 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"数据库初始化失败: {e}")
         raise
-    
+
     # 创建必要的目录
     import os
     os.makedirs(settings.upload_dir, exist_ok=True)
     os.makedirs(settings.report_output_dir, exist_ok=True)
     os.makedirs("logs", exist_ok=True)
-    
+
     logger.info("CheckPaper 应用启动完成")
-    
+
     yield
-    
+
     # 关闭时执行
     logger.info("正在关闭 CheckPaper 应用...")
     # 这里可以添加清理逻辑

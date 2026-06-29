@@ -56,7 +56,7 @@ const HistoryPage: React.FC = () => {
       const [docsData, tasksData] = await Promise.all([
         documentApi.list(),
         validationApi.listTasks(),
-      ])
+      ]) as unknown as [{ documents: DocumentRecord[] }, ValidationRecord[]]
       setDocuments(docsData.documents || [])
       setValidations(tasksData || [])
     } catch (error) {

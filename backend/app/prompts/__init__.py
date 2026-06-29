@@ -3,34 +3,35 @@ CheckPaper 提示词模板管理器
 实现提示词与代码分离
 """
 import os
-from typing import Dict, Any, Optional
-from jinja2 import Environment, FileSystemLoader, BaseLoader
+from typing import Any, Dict, Optional
+
+from jinja2 import BaseLoader, Environment, FileSystemLoader
 
 
 class PromptManager:
     """提示词管理器"""
-    
-    def __init__(self, template_dir: Optional[str] = None):
+
+    def __init__(self, template_dir: str | None = None):
         """
         初始化提示词管理器
-        
+
         Args:
             template_dir: 模板目录路径
         """
         if template_dir is None:
             template_dir = os.path.join(os.path.dirname(__file__), "templates")
-        
+
         self.template_dir = template_dir
         self.env = Environment(
             loader=FileSystemLoader(template_dir) if os.path.exists(template_dir) else BaseLoader(),
             trim_blocks=True,
             lstrip_blocks=True
         )
-        
+
         # 内置提示词
         self._builtin_prompts = self._load_builtin_prompts()
-    
-    def _load_builtin_prompts(self) -> Dict[str, str]:
+
+    def _load_builtin_prompts(self) -> dict[str, str]:
         """加载内置提示词"""
         return {
             "format_check": """你是一个专业的学术论文格式检查专家。请检查以下论文内容的格式规范性：
@@ -48,7 +49,7 @@ class PromptManager:
 
 论文内容：
 {{ content }}""",
-            
+
             "figure_table_check": """你是一个学术论文图表引用检查专家。请检查以下论文中的图片和表格引用：
 
 1. 所有图片/表格是否在正文中被显式引用
@@ -66,7 +67,7 @@ class PromptManager:
 
 表格列表：
 {{ tables }}""",
-            
+
             "citation_check": """你是一个学术论文引用检查专家。请检查以下论文中的参考文献引用：
 
 1. 正文中的引用标记与参考文献列表是否匹配
@@ -84,7 +85,7 @@ class PromptManager:
 
 正文引用：
 {{ citations }}""",
-            
+
             "reference_verify": """你是一个学术文献验证专家。请验证以下参考文献的真实性：
 
 对于每条参考文献，请检查：
@@ -100,7 +101,7 @@ class PromptManager:
 
 参考文献列表：
 {{ references }}""",
-            
+
             "data_source_verify": """你是一个学术数据验证专家。请验证以下论文中的数据来源：
 
 1. 数据来源是否明确标注
@@ -115,7 +116,7 @@ class PromptManager:
 
 数据引用：
 {{ data_references }}""",
-            
+
             "data_processing_verify": """你是一个学术数据处理验证专家。请验证以下论文中的数据处理方法：
 
 1. 统计方法是否正确
@@ -131,7 +132,7 @@ class PromptManager:
 
 统计数据：
 {{ statistics }}""",
-            
+
             "report_generation": """你是一个学术论文报告生成专家。请根据以下验证结果生成一份详细的论文验证报告：
 
 报告应包含：
@@ -146,15 +147,15 @@ class PromptManager:
 
 请以Markdown格式生成报告。"""
         }
-    
+
     def get_prompt(self, prompt_name: str, **kwargs) -> str:
         """
         获取渲染后的提示词
-        
+
         Args:
             prompt_name: 提示词名称
             **kwargs: 模板变量
-        
+
         Returns:
             渲染后的提示词
         """
@@ -164,26 +165,26 @@ class PromptManager:
             return template.render(**kwargs)
         except Exception:
             pass
-        
+
         # 然后尝试从文件加载 jinja2 模板
         try:
             template = self.env.get_template(f"{prompt_name}.j2")
             return template.render(**kwargs)
         except Exception:
             pass
-        
+
         # 最后使用内置提示词
         if prompt_name in self._builtin_prompts:
             from jinja2 import Template
             template = Template(self._builtin_prompts[prompt_name])
             return template.render(**kwargs)
-        
+
         raise ValueError(f"未找到提示词: {prompt_name}")
-    
+
     def list_prompts(self) -> list:
         """列出所有可用的提示词"""
         prompts = list(self._builtin_prompts.keys())
-        
+
         # 添加文件中的提示词
         if os.path.exists(self.template_dir):
             for filename in os.listdir(self.template_dir):
@@ -191,7 +192,7 @@ class PromptManager:
                     name = filename.rsplit('.', 1)[0]
                     if name not in prompts:
                         prompts.append(name)
-        
+
         return prompts
 
 

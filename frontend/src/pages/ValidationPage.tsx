@@ -44,7 +44,7 @@ const ValidationPage: React.FC = () => {
 
     const fetchTask = async () => {
       try {
-        const data = await validationApi.getTask(taskId)
+        const data = await validationApi.getTask(taskId) as unknown as ValidationTask
         setTask(data)
 
         // 更新进度

@@ -3,15 +3,15 @@ CheckPaper 安全模块
 包含认证、授权和安全相关的功能
 """
 from datetime import datetime, timedelta
-from typing import Optional, Union
+
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from jose import JWTError, jwt
 from passlib.context import CryptContext
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlmodel import Session
+
 from .config import settings
 from .db import get_session
-
 
 # 密码哈希上下文
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -21,16 +21,16 @@ security = HTTPBearer()
 
 
 def create_access_token(
-    data: dict, 
-    expires_delta: Optional[timedelta] = None
+    data: dict,
+    expires_delta: timedelta | None = None
 ) -> str:
     """
     创建访问令牌
-    
+
     Args:
         data: 令牌数据
         expires_delta: 过期时间间隔
-    
+
     Returns:
         JWT 令牌字符串
     """
@@ -44,13 +44,13 @@ def create_access_token(
     return encoded_jwt
 
 
-def verify_token(token: str) -> Optional[dict]:
+def verify_token(token: str) -> dict | None:
     """
     验证令牌
-    
+
     Args:
         token: JWT 令牌
-    
+
     Returns:
         令牌数据或 None
     """
@@ -64,10 +64,10 @@ def verify_token(token: str) -> Optional[dict]:
 def get_password_hash(password: str) -> str:
     """
     获取密码哈希
-    
+
     Args:
         password: 原始密码
-    
+
     Returns:
         哈希后的密码
     """
@@ -77,11 +77,11 @@ def get_password_hash(password: str) -> str:
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     验证密码
-    
+
     Args:
         plain_password: 原始密码
         hashed_password: 哈希后的密码
-    
+
     Returns:
         密码是否匹配
     """
@@ -94,14 +94,14 @@ async def get_current_user(
 ):
     """
     获取当前认证用户（依赖注入）
-    
+
     Args:
         credentials: HTTP 认证凭据
         session: 数据库会话
-    
+
     Returns:
         当前用户对象
-    
+
     Raises:
         HTTPException: 认证失败时抛出
     """
@@ -110,26 +110,26 @@ async def get_current_user(
         detail="无法验证凭据",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    
+
     try:
         token = credentials.credentials
         payload = verify_token(token)
         if payload is None:
             raise credentials_exception
-        
+
         user_id: str = payload.get("sub")
         if user_id is None:
             raise credentials_exception
-            
+
     except JWTError:
-        raise credentials_exception
-    
+        raise credentials_exception from None
+
     # 这里可以添加从数据库获取用户的逻辑
     # user = get_user_by_id(session, user_id)
     # if user is None:
     #     raise credentials_exception
     # return user
-    
+
     # 暂时返回用户ID
     return {"user_id": user_id}
 
@@ -137,10 +137,10 @@ async def get_current_user(
 def check_permissions(required_permissions: list):
     """
     权限检查装饰器
-    
+
     Args:
         required_permissions: 需要的权限列表
-    
+
     Returns:
         依赖函数
     """
@@ -156,5 +156,5 @@ def check_permissions(required_permissions: list):
         #             detail="权限不足"
         #         )
         return current_user
-    
+
     return permission_checker

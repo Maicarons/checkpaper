@@ -3,8 +3,10 @@ CheckPaper 数据库配置模块
 使用 SQLModel 进行数据库 ORM 操作
 支持本地 SQLite 和生产 MySQL
 """
-from typing import Generator
-from sqlmodel import SQLModel, Session, create_engine
+from collections.abc import Generator
+
+from sqlmodel import Session, SQLModel, create_engine
+
 from .config import settings
 
 
@@ -14,7 +16,7 @@ def get_engine():
     支持 SQLite (本地) 和 MySQL (生产)
     """
     database_url = settings.database_url
-    
+
     # SQLite 配置
     if database_url.startswith("sqlite"):
         connect_args = {"check_same_thread": False}
@@ -39,7 +41,7 @@ def get_engine():
             database_url,
             echo=settings.db_echo
         )
-    
+
     return engine
 
 

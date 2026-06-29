@@ -7,8 +7,6 @@ import {
   Result,
   Spin,
   Tag,
-  Descriptions,
-  Divider,
   List,
   Space,
   message,
@@ -75,7 +73,7 @@ const ReportPage: React.FC = () => {
 
     const fetchReport = async () => {
       try {
-        const data = await validationApi.getResults(reportId)
+        const data = await validationApi.getResults(reportId) as unknown as ReportData
         setReport(data)
 
         // 生成 Markdown 报告
@@ -175,7 +173,7 @@ const ReportPage: React.FC = () => {
   const handleDownload = async (format: string) => {
     if (!reportId) return
     try {
-      const blob = await reportApi.downloadReport(reportId, format)
+      const blob = await reportApi.downloadReport(reportId, format) as unknown as Blob
       const url = window.URL.createObjectURL(blob)
       const a = document.createElement('a')
       a.href = url

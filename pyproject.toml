@@ -75,6 +75,8 @@ packages = ["backend/app"]
 [tool.ruff]
 target-version = "py311"
 line-length = 88
+
+[tool.ruff.lint]
 select = [
     "E",  # pycodestyle errors
     "W",  # pycodestyle warnings
@@ -86,10 +88,13 @@ select = [
 ]
 ignore = [
     "E501",  # line too long, handled by black
+    "B008",  # FastAPI uses Depends() in function args
+    "UP035",  # deprecated typing imports - keep for compatibility
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = ["F401"]
+"backend/app/schemas/*.py" = ["F821"]  # SQLModel Relationship forward references
 
 [tool.mypy]
 python_version = "3.11"

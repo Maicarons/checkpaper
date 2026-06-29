@@ -1,14 +1,15 @@
 """
 MCP 工具测试
 """
+
 import pytest
-import asyncio
+
 from backend.mcp_server.tools import (
+    _extract_citations,
+    _extract_references,
     check_citations,
     check_figures,
     check_format,
-    _extract_references,
-    _extract_citations,
 )
 
 
@@ -27,9 +28,9 @@ async def test_check_citations():
         {"key": "2"},
         {"key": "3"},
     ]
-    
+
     result = await check_citations(content, references, citations)
-    
+
     assert "issues" in result
     assert "total_references" in result
     assert "total_citations" in result
@@ -48,9 +49,9 @@ async def test_check_citations_missing_reference():
         {"key": "1"},
         {"key": "5"},
     ]
-    
+
     result = await check_citations(content, references, citations)
-    
+
     # 应该有警告：引用5在参考文献中不存在
     assert len(result["issues"]) > 0
     assert any("5" in issue["title"] for issue in result["issues"])
@@ -67,9 +68,9 @@ async def test_check_figures():
     tables = [
         {"id": "1"},
     ]
-    
+
     result = await check_figures(content, figures, tables)
-    
+
     assert "issues" in result
     assert "figures_count" in result
     assert "tables_count" in result
@@ -83,25 +84,25 @@ async def test_check_format():
     content = """
     摘要
     这是一篇测试论文的摘要。
-    
+
     引言
     这是引言部分。
-    
+
     方法
     这是方法部分。
-    
+
     结果
     这是结果部分。
-    
+
     讨论
     这是讨论部分。
-    
+
     结论
     这是结论部分。
     """
-    
+
     result = await check_format(content)
-    
+
     assert "issues" in result
     assert "sections_found" in result
     assert "content_length" in result
@@ -115,9 +116,9 @@ def test_extract_references():
     [2] Johnson, A. (2021). Test Paper 2. Another Journal.
     [3] Williams, B. (2022). Test Paper 3. doi: 10.1234/test
     """
-    
+
     references = _extract_references(text)
-    
+
     assert len(references) == 3
     assert references[0]["id"] == "1"
     assert references[2]["doi"] == "10.1234/test"
@@ -126,9 +127,9 @@ def test_extract_references():
 def test_extract_citations():
     """测试提取引用"""
     text = "This paper [1] cites [2,3] and also [4-6]."
-    
+
     citations = _extract_citations(text)
-    
+
     # 应该提取出 1, 2, 3, 4, 5, 6
     keys = [c["key"] for c in citations]
     assert "1" in keys

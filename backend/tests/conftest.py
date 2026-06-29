@@ -3,12 +3,12 @@ CheckPaper 测试配置
 """
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import SQLModel, Session, create_engine
+from sqlmodel import Session, SQLModel, create_engine
 from sqlmodel.pool import StaticPool
 
-from backend.app.main import app
-from backend.app.core.db import get_session
 from backend.app.core.config import Settings
+from backend.app.core.db import get_session
+from backend.app.main import app
 
 
 @pytest.fixture(name="session")

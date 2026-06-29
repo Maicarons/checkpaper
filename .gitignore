@@ -193,3 +193,10 @@ docker-compose.override.yml
 *.db
 *.sqlite
 *.sqlite3
+
+# Node modules
+node_modules/
+
+# Build output
+dist/
+build/

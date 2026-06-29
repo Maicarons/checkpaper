@@ -4,12 +4,11 @@
 import pytest
 from sqlmodel import Session
 
-from backend.app.services.validation import ValidationService
 from backend.app.schemas.validation import (
-    ValidationTypeEnum,
     ValidationStatus,
-    IssueSeverity,
+    ValidationTypeEnum,
 )
+from backend.app.services.validation import ValidationService
 
 
 @pytest.fixture
@@ -25,7 +24,7 @@ def test_create_validation_task(session: Session, validation_service: Validation
         validation_types=[ValidationTypeEnum.FORMAT, ValidationTypeEnum.CITATION],
         options={"test": True}
     )
-    
+
     assert task.id is not None
     assert task.document_id == "test-doc-1"
     assert task.status == ValidationStatus.PENDING
@@ -39,7 +38,7 @@ def test_get_validation_task(session: Session, validation_service: ValidationSer
         document_id="test-doc-2",
         validation_types=[ValidationTypeEnum.FORMAT],
     )
-    
+
     # 获取任务
     retrieved_task = validation_service.get_validation_task(session, task.id)
     assert retrieved_task is not None
@@ -54,7 +53,7 @@ def test_update_task_status(session: Session, validation_service: ValidationServ
         document_id="test-doc-3",
         validation_types=[ValidationTypeEnum.FORMAT],
     )
-    
+
     # 更新状态为运行中
     updated_task = validation_service.update_task_status(
         session, task.id, ValidationStatus.RUNNING
@@ -62,7 +61,7 @@ def test_update_task_status(session: Session, validation_service: ValidationServ
     assert updated_task is not None
     assert updated_task.status == ValidationStatus.RUNNING
     assert updated_task.started_at is not None
-    
+
     # 更新状态为完成
     completed_task = validation_service.update_task_status(
         session, task.id, ValidationStatus.COMPLETED
@@ -79,11 +78,11 @@ def test_cancel_validation_task(session: Session, validation_service: Validation
         document_id="test-doc-4",
         validation_types=[ValidationTypeEnum.FORMAT],
     )
-    
+
     # 取消任务
     result = validation_service.cancel_validation_task(session, task.id)
     assert result is True
-    
+
     # 确认已取消
     cancelled_task = validation_service.get_validation_task(session, task.id)
     assert cancelled_task.status == ValidationStatus.CANCELLED
@@ -98,7 +97,7 @@ def test_get_validation_tasks_list(session: Session, validation_service: Validat
             document_id=f"test-doc-list-{i}",
             validation_types=[ValidationTypeEnum.FORMAT],
         )
-    
+
     # 获取任务列表
     tasks = validation_service.get_validation_tasks(session, offset=0, limit=10)
     assert len(tasks) >= 3

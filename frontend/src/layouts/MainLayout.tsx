@@ -5,7 +5,6 @@ import {
   HomeOutlined,
   UploadOutlined,
   HistoryOutlined,
-  FileTextOutlined,
 } from '@ant-design/icons'
 
 const { Header, Content, Footer } = Layout

@@ -1,30 +1,29 @@
 """
 CheckPaper 文档管理端点
 """
-from typing import List, Optional
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from fastapi.responses import FileResponse
-from sqlmodel import Session
 import os
 import uuid
 from datetime import datetime
 
+from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi.responses import FileResponse
+from sqlmodel import Session
+
+from ....api.deps import (
+    get_document_service,
+    get_pagination_params,
+    validate_file_extension,
+    validate_file_size,
+)
 from ....core.config import settings
 from ....core.db import get_session
 from ....schemas.document import (
-    DocumentResponse,
     DocumentListResponse,
+    DocumentResponse,
+    DocumentTypeEnum,
     DocumentUploadResponse,
-    DocumentTypeEnum
 )
 from ....services.document import DocumentService
-from ....api.deps import (
-    get_document_service,
-    validate_file_size,
-    validate_file_extension,
-    get_pagination_params
-)
-
 
 router = APIRouter()
 
@@ -32,14 +31,14 @@ router = APIRouter()
 @router.post("/upload", response_model=DocumentUploadResponse)
 async def upload_document(
     file: UploadFile = File(...),
-    document_type: Optional[DocumentTypeEnum] = Form(None),
-    title: Optional[str] = Form(None),
+    document_type: DocumentTypeEnum | None = Form(None),
+    title: str | None = Form(None),
     session: Session = Depends(get_session),
     document_service: DocumentService = Depends(get_document_service)
 ):
     """
     上传论文文档
-    
+
     - **file**: 论文文件（支持 PDF、Word、LaTeX 格式）
     - **document_type**: 文档类型（可选，自动检测）
     - **title**: 文档标题（可选，从文件提取）
@@ -47,32 +46,32 @@ async def upload_document(
     # 验证文件
     if not file.filename:
         raise HTTPException(status_code=400, detail="文件名不能为空")
-    
+
     # 验证文件扩展名
     validate_file_extension(file.filename, settings.allowed_extensions)
-    
+
     # 读取文件内容
     content = await file.read()
     file_size = len(content)
-    
+
     # 验证文件大小
     validate_file_size(file_size, settings.max_upload_size_mb)
-    
+
     # 生成唯一文件名
     file_id = str(uuid.uuid4())
     file_extension = file.filename.rsplit(".", 1)[-1].lower()
     saved_filename = f"{file_id}.{file_extension}"
     file_path = os.path.join(settings.upload_dir, saved_filename)
-    
+
     # 保存文件
     os.makedirs(settings.upload_dir, exist_ok=True)
     with open(file_path, "wb") as f:
         f.write(content)
-    
+
     # 获取文档类型
     if document_type is None:
         document_type = _detect_document_type(file_extension)
-    
+
     # 创建文档记录
     document_data = {
         "id": file_id,
@@ -85,10 +84,10 @@ async def upload_document(
         "upload_time": datetime.utcnow(),
         "status": "uploaded"
     }
-    
+
     # 保存到数据库
     document = document_service.create_document(session, document_data)
-    
+
     return DocumentUploadResponse(
         id=document.id,
         filename=document.filename,
@@ -104,8 +103,8 @@ async def list_documents(
     session: Session = Depends(get_session),
     document_service: DocumentService = Depends(get_document_service),
     pagination: dict = Depends(get_pagination_params),
-    status: Optional[str] = None,
-    document_type: Optional[DocumentTypeEnum] = None
+    status: str | None = None,
+    document_type: DocumentTypeEnum | None = None
 ):
     """
     获取文档列表
@@ -118,14 +117,14 @@ async def list_documents(
         status=status,
         document_type=document_type
     )
-    
+
     # 获取总数
     total = document_service.get_documents_count(
         session,
         status=status,
         document_type=document_type
     )
-    
+
     return DocumentListResponse(
         documents=documents,
         total=total,
@@ -146,7 +145,7 @@ async def get_document(
     document = document_service.get_document(session, document_id)
     if not document:
         raise HTTPException(status_code=404, detail="文档未找到")
-    
+
     return document
 
 
@@ -162,14 +161,14 @@ async def delete_document(
     document = document_service.get_document(session, document_id)
     if not document:
         raise HTTPException(status_code=404, detail="文档未找到")
-    
+
     # 删除文件
     if os.path.exists(document.file_path):
         os.remove(document.file_path)
-    
+
     # 删除数据库记录
     document_service.delete_document(session, document_id)
-    
+
     return {"message": "文档删除成功"}
 
 
@@ -185,10 +184,10 @@ async def download_document(
     document = document_service.get_document(session, document_id)
     if not document:
         raise HTTPException(status_code=404, detail="文档未找到")
-    
+
     if not os.path.exists(document.file_path):
         raise HTTPException(status_code=404, detail="文件不存在")
-    
+
     return FileResponse(
         path=document.file_path,
         filename=document.filename,
@@ -208,10 +207,10 @@ async def parse_document(
     document = document_service.get_document(session, document_id)
     if not document:
         raise HTTPException(status_code=404, detail="文档未找到")
-    
+
     # 解析文档
     parsed_content = document_service.parse_document(session, document_id)
-    
+
     return {
         "document_id": document_id,
         "parsed_content": parsed_content,
