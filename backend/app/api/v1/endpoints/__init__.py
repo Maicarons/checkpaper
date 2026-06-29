@@ -1,0 +1,3 @@
+"""
+CheckPaper API v1 端点模块
+"""

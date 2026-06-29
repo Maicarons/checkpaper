@@ -1,0 +1,79 @@
+# CheckPaper Docker Compose 配置
+version: '3.8'
+
+services:
+  # 后端 API 服务
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: checkpaper-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./reports:/app/reports
+      - ./logs:/app/logs
+    environment:
+      - DATABASE_URL=${DATABASE_URL:-sqlite:///./checkpaper.db}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - DEBUG=${DEBUG:-false}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # MCP 服务器
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: checkpaper-mcp
+    command: ["python", "-c", "from backend.mcp_server.server import main; main()"]
+    volumes:
+      - ./uploads:/app/uploads
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    restart: unless-stopped
+
+  # MySQL 数据库 (生产环境)
+  mysql:
+    image: mysql:8.0
+    container_name: checkpaper-mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-rootpassword}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-checkpaper}
+      - MYSQL_USER=${MYSQL_USER:-checkpaper}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-checkpaper_password}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    profiles:
+      - production
+
+  # 前端服务
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: checkpaper-frontend
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_URL=${VITE_API_URL:-http://localhost:8000}
+    restart: unless-stopped
+    depends_on:
+      - backend
+
+volumes:
+  mysql_data:
