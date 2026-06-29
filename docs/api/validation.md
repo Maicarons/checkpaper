@@ -41,7 +41,7 @@ Create and start a new validation task.
   "document_id": "550e8400-e29b-41d4-a716-446655440000",
   "status": "pending",
   "message": "Validation task created, executing in background",
-  "created_at": "2024-01-15T10:30:00Z"
+  "created_at": "2026-06-30T10:30:00Z"
 }
 ```
 
@@ -90,8 +90,8 @@ Get a paginated list of validation tasks.
       "task_id": "660e8400-e29b-41d4-a716-446655440000",
       "document_id": "550e8400-e29b-41d4-a716-446655440000",
       "status": "completed",
-      "created_at": "2024-01-15T10:30:00Z",
-      "completed_at": "2024-01-15T10:35:00Z"
+      "created_at": "2026-06-30T10:30:00Z",
+      "completed_at": "2026-06-30T10:35:00Z"
     }
   ],
   "total": 8,
@@ -122,9 +122,9 @@ Get details of a specific validation task.
   "document_id": "550e8400-e29b-41d4-a716-446655440000",
   "status": "completed",
   "message": "Validation completed",
-  "created_at": "2024-01-15T10:30:00Z",
-  "started_at": "2024-01-15T10:30:01Z",
-  "completed_at": "2024-01-15T10:35:00Z"
+  "created_at": "2026-06-30T10:30:00Z",
+  "started_at": "2026-06-30T10:30:01Z",
+  "completed_at": "2026-06-30T10:35:00Z"
 }
 ```
 
@@ -176,8 +176,8 @@ Get the detailed results of a completed validation task.
       ]
     }
   ],
-  "created_at": "2024-01-15T10:30:00Z",
-  "completed_at": "2024-01-15T10:35:00Z"
+  "created_at": "2026-06-30T10:30:00Z",
+  "completed_at": "2026-06-30T10:35:00Z"
 }
 ```
 

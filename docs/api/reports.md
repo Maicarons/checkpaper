@@ -24,7 +24,7 @@ Get a paginated list of verification reports.
       "document_id": "doc-uuid",
       "title": "Verification Report for paper.pdf",
       "status": "completed",
-      "created_at": "2024-01-15T10:35:00Z"
+      "created_at": "2026-06-30T10:35:00Z"
     }
   ],
   "total": 5,
@@ -56,7 +56,7 @@ Get detailed information about a specific report, including full Markdown conten
   "title": "Verification Report for paper.pdf",
   "status": "completed",
   "content": "# Verification Report\n\n...",
-  "created_at": "2024-01-15T10:35:00Z"
+  "created_at": "2026-06-30T10:35:00Z"
 }
 ```
 

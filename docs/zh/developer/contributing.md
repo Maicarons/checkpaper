@@ -287,4 +287,4 @@ npm run build  # 生产构建
 
 ## 许可证
 
-参与本项目即表示您同意您的贡献将在 [MIT 许可证](https://github.com/Maicarons/checkpaper/blob/main/LICENSE) 下发布。
+参与本项目即表示您同意您的贡献将在 [GNU Affero 通用公共许可证 v3.0](https://github.com/Maicarons/checkpaper/blob/main/LICENSE) 下发布。

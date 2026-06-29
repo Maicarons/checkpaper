@@ -289,4 +289,4 @@ We are committed to providing a welcoming and inclusive experience for everyone.
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the [MIT License](https://github.com/Maicarons/checkpaper/blob/main/LICENSE).
+By contributing, you agree that your contributions will be licensed under the [GNU Affero General Public License v3.0](https://github.com/Maicarons/checkpaper/blob/main/LICENSE).

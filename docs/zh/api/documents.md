@@ -24,7 +24,7 @@
   "filename": "paper.pdf",
   "file_type": "pdf",
   "file_size": 1024000,
-  "upload_time": "2024-01-15T10:30:00Z",
+  "upload_time": "2026-06-30T10:30:00Z",
   "message": "文档上传成功"
 }
 ```
@@ -66,8 +66,8 @@
       "file_size": 1024000,
       "title": "我的研究论文",
       "status": "parsed",
-      "upload_time": "2024-01-15T10:30:00Z",
-      "parsed_time": "2024-01-15T10:31:00Z"
+      "upload_time": "2026-06-30T10:30:00Z",
+      "parsed_time": "2026-06-30T10:31:00Z"
     }
   ],
   "total": 15,
@@ -100,8 +100,8 @@
   "file_size": 1024000,
   "title": "我的研究论文",
   "status": "parsed",
-  "upload_time": "2024-01-15T10:30:00Z",
-  "parsed_time": "2024-01-15T10:31:00Z"
+  "upload_time": "2026-06-30T10:30:00Z",
+  "parsed_time": "2026-06-30T10:31:00Z"
 }
 ```
 

@@ -24,7 +24,7 @@
       "document_id": "doc-uuid",
       "title": "paper.pdf 验证报告",
       "status": "completed",
-      "created_at": "2024-01-15T10:35:00Z"
+      "created_at": "2026-06-30T10:35:00Z"
     }
   ],
   "total": 5,
@@ -56,7 +56,7 @@
   "title": "paper.pdf 验证报告",
   "status": "completed",
   "content": "# 验证报告\n\n...",
-  "created_at": "2024-01-15T10:35:00Z"
+  "created_at": "2026-06-30T10:35:00Z"
 }
 ```
 

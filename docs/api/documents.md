@@ -24,7 +24,7 @@ Upload a paper document for verification.
   "filename": "paper.pdf",
   "file_type": "pdf",
   "file_size": 1024000,
-  "upload_time": "2024-01-15T10:30:00Z",
+  "upload_time": "2026-06-30T10:30:00Z",
   "message": "Document uploaded successfully"
 }
 ```
@@ -66,8 +66,8 @@ Get a paginated list of uploaded documents.
       "file_size": 1024000,
       "title": "My Research Paper",
       "status": "parsed",
-      "upload_time": "2024-01-15T10:30:00Z",
-      "parsed_time": "2024-01-15T10:31:00Z"
+      "upload_time": "2026-06-30T10:30:00Z",
+      "parsed_time": "2026-06-30T10:31:00Z"
     }
   ],
   "total": 15,
@@ -100,8 +100,8 @@ Get detailed information about a specific document.
   "file_size": 1024000,
   "title": "My Research Paper",
   "status": "parsed",
-  "upload_time": "2024-01-15T10:30:00Z",
-  "parsed_time": "2024-01-15T10:31:00Z"
+  "upload_time": "2026-06-30T10:30:00Z",
+  "parsed_time": "2026-06-30T10:31:00Z"
 }
 ```
 
