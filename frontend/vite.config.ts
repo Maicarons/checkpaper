@@ -17,6 +17,10 @@ export default defineConfig({
         target: 'http://localhost:9031',
         changeOrigin: true,
       },
+      '/docs': {
+        target: 'http://localhost:5173',
+        changeOrigin: true,
+      },
     },
   },
 })

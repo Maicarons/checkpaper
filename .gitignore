@@ -180,11 +180,20 @@ docker-compose.override.yml
 *.swo
 *~
 
+# Test files
+test_*.docx
+test_*.pdf
+
+# VitePress cache
+docs/.vitepress/cache/
+
 # Playwright MCP
 .playwright-mcp/
 
 # Reasonix
 .reasonix/
+reasonix.toml
+AGENTS.md
 
 # Screenshots
 *.png

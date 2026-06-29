@@ -1,13 +1,15 @@
 """
 CheckPaper 报告相关数据模型
 """
-from __future__ import annotations
-
 from datetime import datetime
 from enum import StrEnum
+from typing import TYPE_CHECKING, Optional
 
 from pydantic import BaseModel
 from sqlmodel import Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from .document import Document
 
 
 class ReportStatus(StrEnum):
@@ -45,7 +47,7 @@ class Report(SQLModel, table=True):
     completed_at: datetime | None = None
 
     # 关系
-    document: Document | None = Relationship(back_populates="reports")
+    document: Optional["Document"] = Relationship(back_populates="reports")
 
 
 # Pydantic 请求/响应模型

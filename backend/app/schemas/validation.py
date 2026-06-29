@@ -1,14 +1,15 @@
 """
 CheckPaper 验证相关数据模型
 """
-from __future__ import annotations
-
 from datetime import datetime
 from enum import StrEnum
-from typing import Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import BaseModel
 from sqlmodel import Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from .document import Document
 
 
 class ValidationTypeEnum(StrEnum):
@@ -53,8 +54,8 @@ class ValidationTask(SQLModel, table=True):
     error_message: str | None = None
 
     # 关系
-    document: Document | None = Relationship(back_populates="validation_tasks")
-    results: list[ValidationResult] = Relationship(back_populates="task")
+    document: Optional["Document"] = Relationship(back_populates="validation_tasks")
+    results: list["ValidationResult"] = Relationship(back_populates="task")
 
 
 class ValidationResult(SQLModel, table=True):
@@ -74,8 +75,8 @@ class ValidationResult(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     # 关系
-    task: ValidationTask | None = Relationship(back_populates="results")
-    issues: list[ValidationIssue] = Relationship(back_populates="result")
+    task: Optional["ValidationTask"] = Relationship(back_populates="results")
+    issues: list["ValidationIssue"] = Relationship(back_populates="result")
 
 
 class ValidationIssue(SQLModel, table=True):
@@ -93,7 +94,7 @@ class ValidationIssue(SQLModel, table=True):
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
     # 关系
-    result: ValidationResult | None = Relationship(back_populates="issues")
+    result: Optional["ValidationResult"] = Relationship(back_populates="issues")
 
 
 # Pydantic 请求/响应模型

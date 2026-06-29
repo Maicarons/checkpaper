@@ -144,6 +144,7 @@ const MainLayout: React.FC = () => {
           background: '#111827',
           color: '#9CA3AF',
           padding: '24px 50px',
+          display: location.pathname === '/' ? 'none' : 'block',
         }}
       >
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
@@ -157,7 +158,7 @@ const MainLayout: React.FC = () => {
               GitHub
             </a>
             <a
-              href="https://github.com/Maicarons/checkpaper#readme"
+              href="/docs"
               target="_blank"
               rel="noopener noreferrer"
               style={{ color: '#9CA3AF' }}
@@ -178,7 +179,7 @@ const MainLayout: React.FC = () => {
               rel="noopener noreferrer"
               style={{ color: '#9CA3AF' }}
             >
-              MIT 许可证
+              AGPL 许可证
             </a>
           </Space>
           <div style={{ marginTop: 12 }}>

@@ -456,7 +456,7 @@ const HomePage: React.FC = () => {
                   贡献指南
                 </Button>
                 <Button type="link" href="https://github.com/Maicarons/checkpaper/blob/main/LICENSE" target="_blank" style={{ color: '#9CA3AF', padding: 0, textAlign: 'left' }}>
-                  MIT 许可证
+                  AGPL 许可证
                 </Button>
               </div>
             </Col>
@@ -471,7 +471,7 @@ const HomePage: React.FC = () => {
             }}
           >
             <Text style={{ color: '#6B7280' }}>
-              © {new Date().getFullYear()} CheckPaper. 基于 MIT 许可证开源.
+              © {new Date().getFullYear()} CheckPaper. 基于 AGPL 许可证开源.
             </Text>
           </div>
         </div>

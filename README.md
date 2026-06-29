@@ -132,7 +132,10 @@ checkpaper/
 | `/api/v1/reports/{id}/download` | GET | Download report (md/pdf/html) |
 | `/health` | GET | Health check |
 
-Full API documentation available at [docs/api/](docs/api/) or when the server is running at `http://localhost:9031/docs`.
+Full API documentation available at `http://localhost:9031/docs` (Swagger UI) when the backend is running.
+
+User documentation (VitePress) is available at `http://localhost:9032/docs/` when the frontend is running.
+Start it with: `cd docs && npm install && npm run dev`
 
 ## Validation Types
 

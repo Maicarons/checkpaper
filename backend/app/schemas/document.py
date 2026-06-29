@@ -1,13 +1,16 @@
 """
 CheckPaper 文档数据模型
 """
-from __future__ import annotations
-
 from datetime import datetime
 from enum import StrEnum
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 from sqlmodel import Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from .report import Report
+    from .validation import ValidationTask
 
 
 class DocumentTypeEnum(StrEnum):
@@ -44,8 +47,8 @@ class Document(SQLModel, table=True):
     error_message: str | None = None
 
     # 关系
-    validation_tasks: list[ValidationTask] = Relationship(back_populates="document")
-    reports: list[Report] = Relationship(back_populates="document")
+    validation_tasks: list["ValidationTask"] = Relationship(back_populates="document")
+    reports: list["Report"] = Relationship(back_populates="document")
 
 
 # Pydantic 请求/响应模型
