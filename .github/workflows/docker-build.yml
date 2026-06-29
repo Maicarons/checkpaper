@@ -3,7 +3,6 @@ name: Docker Build
 on:
   push:
     branches: [ main ]
-    tags: [ 'v*' ]
   pull_request:
     branches: [ main ]
 
@@ -14,24 +13,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
-    
     - name: Build backend image
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: Dockerfile.backend
-        push: false
-        tags: checkpaper-backend:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      run: docker build -f Dockerfile.backend -t checkpaper-backend .
     
     - name: Build frontend image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./frontend
-        push: false
-        tags: checkpaper-frontend:latest
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
+      run: docker build -t checkpaper-frontend ./frontend
