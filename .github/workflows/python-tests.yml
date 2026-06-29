@@ -24,11 +24,19 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install fastapi uvicorn pydantic-settings sqlmodel httpx pytest pytest-cov
+        pip install fastapi uvicorn pydantic-settings sqlmodel httpx pytest pytest-cov ruff mypy python-jose passlib
+    
+    - name: Lint with ruff
+      run: |
+        ruff check backend/
+    
+    - name: Type check with mypy
+      run: |
+        mypy backend/ --ignore-missing-imports || true
     
     - name: Run tests
       run: |
-        pytest backend/tests/ -v --tb=short || true
+        pytest backend/tests/ -v --tb=short
       env:
         OPENAI_API_KEY: "test-key"
         DATABASE_URL: "sqlite:///./test.db"
